@@ -1,0 +1,533 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nixer_Exe Forum | Archive</title>
+    <style>
+        :root {
+            --primary: #ff00ff;
+            --secondary: #bc13fe;
+            --bg: #c0c0c0; 
+            --panel-bg: #dfdfdf;
+            --text: #000000;
+            --border-light: #ffffff;
+            --border-dark: #808080;
+            --border-darkest: #000000;
+            --arch-bg: #1c1c1c;
+            --arch-text: #d1d1d1;
+            --arch-blue: #1793d1;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: "Times New Roman", serif;
+        }
+
+        body {
+            background-color: var(--bg);
+            color: var(--text);
+            overflow-x: hidden;
+            min-height: 100vh;
+            background-image: url('https://www.transparenttextures.com/patterns/carbon-fibre.png');
+        }
+
+        .outset {
+            border: 2px solid;
+            border-color: var(--border-light) var(--border-darkest) var(--border-darkest) var(--border-light);
+        }
+
+        .inset {
+            border: 2px solid;
+            border-color: var(--border-darkest) var(--border-light) var(--border-light) var(--border-darkest);
+        }
+
+        #canvas-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            z-index: -1;
+            opacity: 0.3;
+        }
+
+        .container {
+            position: relative;
+            z-index: 1;
+            max-width: 1000px;
+            margin: 20px auto;
+            padding: 10px;
+        }
+
+        header {
+            padding: 40px 0;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        h1 {
+            font-size: 4rem;
+            font-weight: bold;
+            color: #000080; 
+            text-shadow: 2px 2px var(--border-light);
+            margin-bottom: 0.5rem;
+        }
+
+        .subtitle {
+            font-size: 1.2rem;
+            color: #000;
+            margin-bottom: 2rem;
+            font-weight: bold;
+            font-style: italic;
+            text-shadow: 1px 1px var(--border-light);
+        }
+
+        /* --- ARCH TERMINAL STYLE --- */
+        .terminal-window {
+            width: 100%;
+            max-width: 850px;
+            margin: 20px auto;
+            background: var(--arch-bg);
+            display: none; 
+            border: 1px solid #444;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        }
+
+        .terminal-header {
+            background: #333;
+            color: #bbb;
+            padding: 5px 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-family: "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            font-size: 0.8rem;
+            border-bottom: 1px solid #444;
+        }
+
+        .terminal-body {
+            background: var(--arch-bg);
+            color: var(--arch-text);
+            font-family: 'Courier New', Courier, monospace;
+            padding: 15px;
+            height: 400px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            font-size: 13px;
+            line-height: 1.1;
+        }
+
+        .term-line { 
+            margin-bottom: 4px; 
+            white-space: pre-wrap; 
+            word-wrap: break-word; 
+        }
+        
+        .term-logo {
+            color: var(--arch-blue);
+            font-weight: bold;
+            white-space: pre; 
+            line-height: 1;
+            margin-bottom: 20px;
+            display: block;
+            font-family: 'Courier New', Courier, monospace !important;
+            letter-spacing: 0px !important;
+            word-spacing: 0px !important;
+        }
+
+        .term-prompt { color: var(--arch-blue); font-weight: bold; }
+        .term-input-area {
+            display: flex;
+            margin-top: 5px;
+        }
+        .term-input {
+            background: transparent;
+            border: none;
+            color: var(--arch-text);
+            font-family: inherit;
+            font-size: inherit;
+            outline: none;
+            flex: 1;
+            margin-left: 10px;
+        }
+
+        /* --- СЕКЦИЯ ССЫЛОК --- */
+        .links-section {
+            background: var(--panel-bg);
+            display: none;
+            margin-bottom: 20px;
+        }
+
+        .forum-header {
+            background: linear-gradient(90deg, #000080, #1084d0);
+            color: white;
+            padding: 5px 10px;
+            font-weight: bold;
+            font-size: 1rem;
+        }
+
+        .links-row {
+            display: grid;
+            grid-template-columns: 50px 1fr 150px;
+            border-bottom: 1px solid var(--border-dark);
+            background: #fff;
+            padding: 10px;
+            align-items: center;
+            text-decoration: none;
+            color: inherit;
+            transition: background 0.2s;
+        }
+
+        .links-row:hover { background: #ffffcc; }
+        .link-text { color: #0000EE; text-decoration: underline; font-weight: bold; font-size: 1.1rem; }
+
+        .btn {
+            padding: 5px 15px;
+            background: var(--panel-bg);
+            color: black;
+            cursor: pointer;
+            outline: 2px solid;
+            border: 2px solid;
+            border-color: var(--border-light) var(--border-darkest) var(--border-darkest) var(--border-light);
+            font-family: "MS Sans Serif", Arial, sans-serif;
+            font-size: 0.9rem;
+            margin: 5px;
+        }
+
+        .btn:active {
+            border-color: var(--border-darkest) var(--border-light) var(--border-light) var(--border-darkest);
+            padding: 6px 14px 4px 16px;
+        }
+
+        /* Ретро-плеер */
+        .music-player {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: var(--panel-bg);
+            border: 2px solid;
+            border-color: var(--border-light) var(--border-darkest) var(--border-darkest) var(--border-light);
+            padding: 10px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            z-index: 1000;
+            font-family: "MS Sans Serif", Arial, sans-serif;
+        }
+
+        .player-info { display: flex; flex-direction: column; min-width: 150px; }
+        .player-track { font-size: 0.8rem; font-weight: bold; color: #000; }
+        .player-artist { font-size: 0.7rem; color: #666; }
+        .volume-slider, .seek-slider {
+            -webkit-appearance: none;
+            height: 4px;
+            background: #808080;
+            outline: none;
+        }
+        .volume-slider { width: 80px; }
+        .seek-slider { width: 150px; margin: 0 10px; }
+        .volume-slider::-webkit-slider-thumb, .seek-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 10px;
+            height: 10px;
+            background: #000;
+            cursor: pointer;
+        }
+
+        .player-controls { display: flex; align-items: center; gap: 5px; }
+        .control-btn {
+            background: var(--panel-bg);
+            border: 2px solid;
+            border-color: var(--border-light) var(--border-darkest) var(--border-darkest) var(--border-light);
+            color: black;
+            cursor: pointer;
+            width: 30px;
+            height: 30px;
+            font-size: 1rem;
+        }
+    </style>
+</head>
+<body>
+
+    <canvas id="canvas-bg"></canvas>
+
+    <audio id="bg-music" loop>
+        <source src="C:/Users/Linux User/Music/(Стационар) Дым твоего подъезда feat. От пяти до десяти - Стационар.mp3" type="audio/mpeg">
+    </audio>
+
+    <div class="music-player outset">
+        <div class="player-info">
+            <span class="player-track">Стационар</span>
+            <span class="player-artist">От пяти до десяти</span>
+            <span id="current-time" style="font-size: 0.6rem; opacity: 0.8;">0:00 / 0:00</span>
+        </div>
+        <div class="player-controls">
+            <button class="control-btn" id="play-pause-btn" onclick="toggleMusic()">▶</button>
+            <input type="range" class="seek-slider" id="seek-control" value="0" step="1">
+            <input type="range" class="volume-slider" id="volume-control" min="0" max="1" step="0.01" value="0.5">
+            <span style="font-size: 0.7rem;">VOL</span>
+        </div>
+    </div>
+
+    <div class="container">
+        <header>
+            <h1>Nixer_Exe Forum</h1>
+            <p class="subtitle">Добро пожаловать в архив цифровой эпохи</p>
+            <div style="display: flex; flex-wrap: wrap; justify-content: center;">
+                <button class="btn" onclick="toggleLinks()">📦 Ресурсы</button>
+                <button class="btn" onclick="toggleTerminal()">💻 Консоль Arch</button>
+            </div>
+        </header>
+
+        <!-- ARCH TERMINAL -->
+        <div class="terminal-window outset" id="terminal">
+            <div class="terminal-header">
+                <span style="color: #aaa;">nixer@archlinux: ~</span>
+                <span style="cursor:pointer" onclick="toggleTerminal()">✕</span>
+            </div>
+            <div class="terminal-body" id="term-body">
+                <!-- Logo will appear here -->
+            </div>
+            <div class="terminal-body" style="height: 40px; border-top: 1px solid #444; flex-direction: row; align-items: center;">
+                <span class="term-prompt">[nixer@arch ~]$</span>
+                <input type="text" class="term-input" id="term-input" autocomplete="off">
+            </div>
+        </div>
+
+        <div id="content" style="padding-bottom: 10vh;">
+            <div class="links-section outset" id="links-container">
+                <div class="forum-header">Мои Ресурсы</div>
+                <a href="https://www.youtube.com/@Nixer_Exe" target="_blank" class="links-row">
+                    <div class="inset" style="text-align: center; font-size: 1.2rem;">📺</div>
+                    <div class="link-text">YouTube Канал</div>
+                    <div style="font-size: 0.8rem; text-align: right;">Подписаться</div>
+                </a>
+                <a href="https://vk.ru/nixer_exe" target="_blank" class="links-row">
+                    <div class="inset" style="text-align: center; font-size: 1.2rem;">🟦</div>
+                    <div class="link-text">ВКонтакте</div>
+                    <div style="font-size: 0.8rem; text-align: right;">Личная страница</div>
+                </a>
+                <a href="https://t.me/Nixer_Exe" target="_blank" class="links-row">
+                    <div class="inset" style="text-align: center; font-size: 1.2rem;">✈️</div>
+                    <div class="link-text">Telegram</div>
+                    <div style="font-size: 0.8rem; text-align: right;">Написать мне</div>
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const termInput = document.getElementById('term-input');
+        const termBody = document.getElementById('term-body');
+
+        const archLogo = `███╗░░██╗██╗██╗░░██╗███████╗██████╗░░░░░░░███████╗██╗░░██╗███████╗
+████╗░██║██║╚██╗██╔╝██╔════╝██╔══██╗░░░░░░██╔════╝╚██╗██╔╝██╔════╝
+██╔██╗██║██║░╚███╔╝░█████╗░░██████╔╝█████╗█████╗░░░╚███╔╝░█████╗░░
+██║╚████║██║░██╔██╗░██╔══╝░░██╔══██╗╚════╝██╔══╝░░░██╔██╗░██╔══╝░░
+██║░╚███║██║██╔╝╚██╗███████╗██║░░██║░░░░░░███████╗██╔╝╚██╗███████╗
+╚═╝░░╚══╝╚═╝╚═╝░░╚═╝╚══════╝╚═╝░░╚═╝░░░░░░╚══════╝╚═╝░░╚═╝╚══════╝`;
+
+        const commands = {
+            // Используем \n для переноса строк
+            'help': '- about: О проекте\n- status: Состояние системы\n- clear: Очистить экран\n- links: Показать ресурсы\n- exit: Закрыть консоль\n- youtube: Ссылка на YouTube\n- vk: Ссылка на VK\n- tg: Ссылка на Telegram\n- github: Открыть GitHub',
+            'about': 'Nixer_Exe Forum — цифровой архив. Работает на базе Arch Linux (симуляция).',
+            'status': 'OS: Arch Linux x86_64\nKernel: 6.7.1-arch1-1\nUptime: 1337 hours\nStatus: Online',
+            'links': 'Перенаправляю к ресурсам...',
+            'youtube': 'YouTube: <a href="https://www.youtube.com/@Nixer_Exe" target="_blank" style="color: #ff0000">youtube.com/@Nixer_Exe</a>',
+            'vk': 'ВКонтакте: <a href="https://vk.ru/nixer_exe" target="_blank" style="color: #4a76a8">vk.ru/nixer_exe</a>',
+            'tg': 'Telegram: <a href="https://t.me/Nixer_Exe" target="_blank" style="color: #0088cc">t.me/Nixer_Exe</a>',
+            'exit': 'Завершение сессии. Goodbye!'
+        };
+
+        async function typeText(text, speed = 20, isLogo = false) {
+            const line = document.createElement('div');
+            line.className = isLogo ? 'term-logo' : 'term-line';
+            termBody.appendChild(line);
+            
+            let i = 0;
+            while (i < text.length) {
+                // ФИКС ССЫЛОК: если встречаем '<', ищем конец тега '>' и вставляем его целиком
+                if (text[i] === '<') {
+                    let closingIndex = text.indexOf('>', i);
+                    if (closingIndex !== -1) {
+                        line.innerHTML += text.substring(i, closingIndex + 1);
+                        i = closingIndex + 1;
+                        continue;
+                    }
+                }
+                
+                // Обычный вывод символа
+                line.innerHTML += text[i];
+                termBody.scrollTop = termBody.scrollHeight;
+                await new Promise(r => setTimeout(r, speed));
+                i++;
+            }
+        }
+
+        termInput.addEventListener('keydown', async (e) => {
+            if (e.key === 'Enter') {
+                const cmd = termInput.value.toLowerCase().trim();
+                termInput.value = '';
+
+                const inputLine = document.createElement('div');
+                inputLine.className = 'term-line';
+                inputLine.innerHTML = `<span class="term-prompt">[nixer@arch ~]$</span> ${cmd}`;
+                termBody.appendChild(inputLine);
+
+                if (cmd === 'clear') {
+                    termBody.innerHTML = '';
+                } else if (cmd === 'links') {
+                    await typeText(commands['links']);
+                    toggleLinks();
+                } else if (cmd === 'github') {
+                    await typeText('Opening GitHub: https://github.com/GevonLight...');
+                    setTimeout(() => {
+                        window.open('https://github.com/GevonLight', '_blank');
+                    }, 1500);
+                } else if (cmd === 'exit') {
+                    await typeText(commands['exit']);
+                    setTimeout(toggleTerminal, 1000);
+                } else if (commands[cmd]) {
+                    await typeText(commands[cmd]);
+                } else if (cmd !== "") {
+                    await typeText(`bash: ${cmd}: command not found`);
+                }
+                termBody.scrollTop = termBody.scrollHeight;
+            }
+        });
+
+        function toggleTerminal() {
+            const term = document.getElementById('terminal');
+            const isHidden = term.style.display === 'none' || term.style.display === '';
+            term.style.display = isHidden ? 'block' : 'none';
+            if(isHidden) {
+                termBody.innerHTML = '';
+                typeText(archLogo, 2, true);
+                termInput.focus();
+            }
+        }
+
+        function toggleLinks() {
+            const container = document.getElementById('links-container');
+            const isHidden = container.style.display === 'none' || container.style.display === '';
+            container.style.display = isHidden ? 'block' : 'none';
+            if(isHidden) container.scrollIntoView({ behavior: 'smooth' });
+        }
+
+        const canvas = document.getElementById('canvas-bg');
+        const ctx = canvas.getContext('2d');
+        let particles = [];
+        const mouse = { x: null, y: null, radius: 150 };
+
+        function initCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+        window.addEventListener('resize', initCanvas);
+        initCanvas();
+        window.addEventListener('mousemove', (e) => { mouse.x = e.x; mouse.y = e.y; });
+
+        class Particle {
+            constructor() {
+                this.x = Math.random() * canvas.width;
+                this.y = Math.random() * canvas.height;
+                this.size = Math.random() * 2 + 1;
+                this.vx = (Math.random() - 0.5) * 0.5;
+                this.vy = (Math.random() - 0.5) * 0.5;
+            }
+            draw() {
+                ctx.fillStyle = 'rgba(255, 0, 255, 0.5)';
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                ctx.fill();
+            }
+            update() {
+                this.x += this.vx; this.y += this.vy;
+                if (this.x < 0 || this.x > canvas.width) this.vx *= -1;
+                if (this.y < 0 || this.y > canvas.height) this.vy *= -1;
+                let dx = mouse.x - this.x, dy = mouse.y - this.y;
+                let distance = Math.sqrt(dx * dx + dy * dy);
+                if (distance < mouse.radius) {
+                    const force = (mouse.radius - distance) / mouse.radius;
+                    this.x -= (dx / distance) * force * 5;
+                    this.y -= (dy / distance) * force * 5;
+                }
+            }
+        }
+
+        function createParticles() {
+            particles = [];
+            const numberOfParticles = (canvas.width * canvas.height) / 9000;
+            for (let i = 0; i < numberOfParticles; i++) particles.push(new Particle());
+        }
+        createParticles();
+
+        function connect() {
+            for (let a = 0; a < particles.length; a++) {
+                for (let b = a; b < particles.length; b++) {
+                    let dx = particles[a].x - particles[b].x, dy = particles[a].y - particles[b].y;
+                    let distance = Math.sqrt(dx * dx + dy * dy);
+                    if (distance < 150) {
+                        let opacity = 1 - (distance / 150);
+                        ctx.strokeStyle = `rgba(188, 19, 254, ${opacity * 0.3})`;
+                        ctx.lineWidth = 1;
+                        ctx.beginPath();
+                        ctx.moveTo(particles[a].x, particles[a].y);
+                        ctx.lineTo(particles[b].x, particles[b].y);
+                        ctx.stroke();
+                    }
+                }
+            }
+        }
+
+        function animate() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            particles.forEach(p => { p.update(); p.draw(); });
+            connect();
+            requestAnimationFrame(animate);
+        }
+        animate();
+
+        function toggleMusic() {
+            const music = document.getElementById('bg-music');
+            const btn = document.getElementById('play-pause-btn');
+            if (music.paused) {
+                music.play().catch(e => console.log("Ошибка автоплея"));
+                btn.innerText = '⏸';
+            } else {
+                music.pause();
+                btn.innerText = '▶';
+            }
+        }
+
+        const volumeControl = document.getElementById('volume-control');
+        const music = document.getElementById('bg-music');
+        volumeControl.addEventListener('input', (e) => { music.volume = e.target.value; });
+        music.volume = 0.5;
+
+        const seekControl = document.getElementById('seek-control');
+        const timeDisplay = document.getElementById('current-time');
+        function formatTime(seconds) {
+            let min = Math.floor(seconds / 60), sec = Math.floor(seconds % 60);
+            return `${min}:${sec < 10 ? '0' + sec : sec}`;
+        }
+        music.addEventListener('timeupdate', () => {
+            seekControl.max = music.duration;
+            seekControl.value = music.currentTime;
+            if (!isNaN(music.duration)) {
+                timeDisplay.innerText = `${formatTime(music.currentTime)} / ${formatTime(music.duration)}`;
+            }
+        });
+
+        seekControl.addEventListener('input', (e) => { 
+            music.currentTime = e.target.value; 
+        });
+    </script>
+</body>
+</html>
