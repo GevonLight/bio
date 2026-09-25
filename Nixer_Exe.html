@@ -257,7 +257,6 @@
 
     <canvas id="canvas-bg"></canvas>
 
-    <!-- ТЕГ AUDIO ТЕПЕРЬ БЕЗ SRC (загружается через JS) -->
     <audio id="bg-music" loop></audio>
 
     <div class="music-player outset">
@@ -323,27 +322,12 @@
 
     <script>
         // --- МУЗЫКАЛЬНЫЙ ПЛЕЙЛИСТ ---
-        // Я добавил все песни, которые видел в твоем репозитории
+        // Оставляю только одну реальную песню из твоего репозитория
         const playlist = [
             {
                 file: "(Стационар) Дым твоего подъезда feat. От пяти до десяти - Стационар.mp3",
                 name: "Дым твоего подъезда",
                 artist: "Стационар"
-            },
-            {
-                file: "Miyagi & Andy Panda - I Got Love.mp3",
-                name: "I Got Love",
-                artist: "Miyagi & Andy Panda"
-            },
-            {
-                file: "MACAN - ASPHALT 8.mp3",
-                name: "ASPHALT 8",
-                artist: "MACAN"
-            },
-            {
-                file: "MODERNE - Глава 1.mp3",
-                name: "Глава 1",
-                artist: "MODERNE"
             }
         ];
         let currentTrackIndex = 0;
@@ -354,7 +338,7 @@
 
         function loadTrack(index) {
             const track = playlist[index];
-            music.src = track.file; // Путь теперь относительный (файл в той же папке)
+            music.src = track.file; 
             trackNameDisplay.innerText = track.name;
             trackArtistDisplay.innerText = track.artist;
             music.load();
@@ -371,7 +355,6 @@
             }
         }
 
-        // Автопереключение треков
         music.addEventListener('ended', () => {
             currentTrackIndex++;
             if (currentTrackIndex >= playlist.length) currentTrackIndex = 0;
@@ -379,7 +362,6 @@
             music.play();
         });
 
-        // Загружаем первый трек при старте
         loadTrack(currentTrackIndex);
 
         // --- ARCH TERMINAL LOGIC ---
@@ -476,7 +458,6 @@
             if(isHidden) container.scrollIntoView({ behavior: 'smooth' });
         }
 
-        // --- ОСТАЛЬНАЯ ЛОГИКА ---
         const canvas = document.getElementById('canvas-bg');
         const ctx = canvas.getContext('2d');
         let particles = [];
