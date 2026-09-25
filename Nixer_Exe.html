@@ -257,14 +257,13 @@
 
     <canvas id="canvas-bg"></canvas>
 
-    <audio id="bg-music" loop>
-        <source src="(Стационар) Дым твоего подъезда feat. От пяти до десяти - Стационар.mp3" type="audio/mpeg">
-    </audio>
+    <!-- ТЕГ AUDIO ТЕПЕРЬ БЕЗ SRC (загружается через JS) -->
+    <audio id="bg-music" loop></audio>
 
     <div class="music-player outset">
         <div class="player-info">
-            <span class="player-track">Стационар</span>
-            <span class="player-artist">От пяти до десяти</span>
+            <span class="player-track" id="track-name">Загрузка...</span>
+            <span class="player-artist" id="track-artist">Nixer Archive</span>
             <span id="current-time" style="font-size: 0.6rem; opacity: 0.8;">0:00 / 0:00</span>
         </div>
         <div class="player-controls">
@@ -323,6 +322,67 @@
     </div>
 
     <script>
+        // --- МУЗЫКАЛЬНЫЙ ПЛЕЙЛИСТ ---
+        // Я добавил все песни, которые видел в твоем репозитории
+        const playlist = [
+            {
+                file: "(Стационар) Дым твоего подъезда feat. От пяти до десяти - Стационар.mp3",
+                name: "Дым твоего подъезда",
+                artist: "Стационар"
+            },
+            {
+                file: "Miyagi & Andy Panda - I Got Love.mp3",
+                name: "I Got Love",
+                artist: "Miyagi & Andy Panda"
+            },
+            {
+                file: "MACAN - ASPHALT 8.mp3",
+                name: "ASPHALT 8",
+                artist: "MACAN"
+            },
+            {
+                file: "MODERNE - Глава 1.mp3",
+                name: "Глава 1",
+                artist: "MODERNE"
+            }
+        ];
+        let currentTrackIndex = 0;
+
+        const music = document.getElementById('bg-music');
+        const trackNameDisplay = document.getElementById('track-name');
+        const trackArtistDisplay = document.getElementById('track-artist');
+
+        function loadTrack(index) {
+            const track = playlist[index];
+            music.src = track.file; // Путь теперь относительный (файл в той же папке)
+            trackNameDisplay.innerText = track.name;
+            trackArtistDisplay.innerText = track.artist;
+            music.load();
+        }
+
+        function toggleMusic() {
+            const btn = document.getElementById('play-pause-btn');
+            if (music.paused) {
+                music.play().catch(e => console.log("Ошибка автоплея"));
+                btn.innerText = '⏸';
+            } else {
+                music.pause();
+                btn.innerText = '▶';
+            }
+        }
+
+        // Автопереключение треков
+        music.addEventListener('ended', () => {
+            currentTrackIndex++;
+            if (currentTrackIndex >= playlist.length) currentTrackIndex = 0;
+            loadTrack(currentTrackIndex);
+            music.play();
+        });
+
+        // Загружаем первый трек при старте
+        loadTrack(currentTrackIndex);
+
+        // --- ARCH TERMINAL LOGIC ---
         const termInput = document.getElementById('term-input');
         const termBody = document.getElementById('term-body');
 
@@ -334,8 +394,7 @@
 ╚═╝░░╚══╝╚═╝╚═╝░░╚═╝╚══════╝╚═╝░░╚═╝░░░░░░╚══════╝╚═╝░░╚═╝╚══════╝`;
 
         const commands = {
-            // Используем \n для переноса строк
-            'help': '- about: О проекте\n- status: Состояние системы\n- clear: Очистить экран\n- links: Показать ресурсы\n- exit: Закрыть консоль\n- youtube: Ссылка на YouTube\n- vk: Ссылка на VK\n- tg: Ссылка на Telegram\n- github: Открыть GitHub',
+            'help': 'Доступные команды:<br>- about: О проекте<br>- status: Состояние системы<br>- clear: Очистить экран<br>- links: Показать ресурсы<br>- exit: Закрыть консоль<br>- youtube: Ссылка на YouTube<br>- vk: Ссылка на VK<br>- tg: Ссылка на Telegram<br>- github: Открыть GitHub',
             'about': 'Nixer_Exe Forum — цифровой архив. Работает на базе Arch Linux (симуляция).',
             'status': 'OS: Arch Linux x86_64\nKernel: 6.7.1-arch1-1\nUptime: 1337 hours\nStatus: Online',
             'links': 'Перенаправляю к ресурсам...',
@@ -352,7 +411,6 @@
             
             let i = 0;
             while (i < text.length) {
-                // ФИКС ССЫЛОК: если встречаем '<', ищем конец тега '>' и вставляем его целиком
                 if (text[i] === '<') {
                     let closingIndex = text.indexOf('>', i);
                     if (closingIndex !== -1) {
@@ -361,8 +419,6 @@
                         continue;
                     }
                 }
-                
-                // Обычный вывод символа
                 line.innerHTML += text[i];
                 termBody.scrollTop = termBody.scrollHeight;
                 await new Promise(r => setTimeout(r, speed));
@@ -420,6 +476,7 @@
             if(isHidden) container.scrollIntoView({ behavior: 'smooth' });
         }
 
+        // --- ОСТАЛЬНАЯ ЛОГИКА ---
         const canvas = document.getElementById('canvas-bg');
         const ctx = canvas.getContext('2d');
         let particles = [];
@@ -494,20 +551,7 @@
         }
         animate();
 
-        function toggleMusic() {
-            const music = document.getElementById('bg-music');
-            const btn = document.getElementById('play-pause-btn');
-            if (music.paused) {
-                music.play().catch(e => console.log("Ошибка автоплея"));
-                btn.innerText = '⏸';
-            } else {
-                music.pause();
-                btn.innerText = '▶';
-            }
-        }
-
         const volumeControl = document.getElementById('volume-control');
-        const music = document.getElementById('bg-music');
         volumeControl.addEventListener('input', (e) => { music.volume = e.target.value; });
         music.volume = 0.5;
 
